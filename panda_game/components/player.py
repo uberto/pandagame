@@ -3,9 +3,9 @@ import pygame
 class Player(pygame.sprite.Sprite):
     def __init__(self, start_x, start_y):
         super().__init__()
-        # Temporary rectangle for the panda (will be replaced with proper sprite)
-        self.image = pygame.Surface([40, 40])
-        self.image.fill((255, 255, 255))  # White
+        # Create a surface for the panda with transparency
+        self.image = pygame.Surface([40, 40], pygame.SRCALPHA)
+        self.draw_panda()
         self.rect = self.image.get_rect()
         self.rect.x = start_x
         self.rect.y = start_y
@@ -20,6 +20,41 @@ class Player(pygame.sprite.Sprite):
         self.climb_speed = 3  # Separate speed for climbing
         self.jump_power = 15
         self.gravity = 0.8
+        
+        # Direction the panda is facing (1 = right, -1 = left)
+        self.facing_right = True
+        
+        # Level boundaries
+        self.level_left_boundary = 0
+        self.level_right_boundary = 800  # Will be updated by the game
+        
+    def draw_panda(self):
+        """Draw a cute panda on the image surface"""
+        # Clear the surface
+        self.image.fill((0, 0, 0, 0))  # Transparent background
+        
+        # Body (white circle)
+        pygame.draw.ellipse(self.image, (255, 255, 255), [2, 2, 36, 36])
+        
+        # Ears (black circles)
+        pygame.draw.circle(self.image, (0, 0, 0), (8, 8), 6)  # Left ear
+        pygame.draw.circle(self.image, (0, 0, 0), (32, 8), 6)  # Right ear
+        
+        # Eyes (black circles with white highlights)
+        pygame.draw.circle(self.image, (0, 0, 0), (12, 16), 5)  # Left eye
+        pygame.draw.circle(self.image, (0, 0, 0), (28, 16), 5)  # Right eye
+        pygame.draw.circle(self.image, (255, 255, 255), (14, 14), 2)  # Left eye highlight
+        pygame.draw.circle(self.image, (255, 255, 255), (30, 14), 2)  # Right eye highlight
+        
+        # Nose (black oval)
+        pygame.draw.ellipse(self.image, (0, 0, 0), [16, 20, 8, 6])
+        
+        # Mouth (curved line)
+        pygame.draw.arc(self.image, (0, 0, 0), [12, 22, 16, 10], 0.2, 2.9, 2)
+        
+        # Black patches around eyes
+        pygame.draw.ellipse(self.image, (0, 0, 0), [8, 12, 10, 10], 3)  # Left eye patch
+        pygame.draw.ellipse(self.image, (0, 0, 0), [22, 12, 10, 10], 3)  # Right eye patch
         
     def update(self, platforms=None, bamboo=None):
         # Store previous position for collision resolution
@@ -50,6 +85,20 @@ class Player(pygame.sprite.Sprite):
         # Update horizontal position
         self.rect.x += self.velocity_x
         
+        # Enforce level boundaries
+        if self.rect.left < self.level_left_boundary:
+            self.rect.left = self.level_left_boundary
+            self.velocity_x = 0
+        elif self.rect.right > self.level_right_boundary:
+            self.rect.right = self.level_right_boundary
+            self.velocity_x = 0
+        
+        # Update facing direction based on movement
+        if self.velocity_x > 0:
+            self.facing_right = True
+        elif self.velocity_x < 0:
+            self.facing_right = False
+        
         # Check for platform collisions after horizontal movement
         if platforms:
             for platform in platforms:
@@ -78,7 +127,12 @@ class Player(pygame.sprite.Sprite):
                             if prev_y > platform.rect.bottom - 10:
                                 self.rect.top = platform.rect.bottom
                                 self.velocity_y = 0
-            
+    
+    def handle_platform_collisions(self, platforms):
+        """Handle collisions with platforms (alternative method for compatibility)"""
+        # This is a no-op since collisions are already handled in update()
+        pass
+
     def jump(self):
         if self.on_ground:
             self.velocity_y = -self.jump_power
@@ -96,4 +150,9 @@ class Player(pygame.sprite.Sprite):
         """Stop vertical movement when climbing keys are released"""
         if self.climbing:
             self.climb_direction = 0
-            self.velocity_y = 0 
+            self.velocity_y = 0
+            
+    def set_level_boundaries(self, left, right):
+        """Set the level boundaries to prevent the panda from leaving the level"""
+        self.level_left_boundary = left
+        self.level_right_boundary = right 

@@ -9,6 +9,8 @@ A fun platformer game where you play as a panda trying to escape and free your a
 - Rescue caged animal friends
 - Avoid zookeepers
 - Platformer-style gameplay inspired by Lode Runner
+- Scrolling levels that extend beyond the screen
+- Island-themed levels with ocean boundaries
 
 ## Installation
 1. Make sure you have Python 3.8+ installed
@@ -74,6 +76,14 @@ If you encounter any issues with Python environment variables (like PYTHONHOME o
 - You can still move left and right while climbing
 - Platforms won't block your movement while climbing bamboo
 
+### Scrolling Levels
+- Each level extends beyond the visible screen
+- The camera will automatically follow your panda as you move
+- Explore the entire level to find all caged animals
+- The screen smoothly scrolls horizontally and vertically as you move
+- Each level is an island surrounded by ocean - you can't fall off the edges!
+- Beach edges and palm trees mark the boundaries of the island
+
 ## Troubleshooting
 If you encounter issues with Python paths or environment variables, try:
 
@@ -93,4 +103,4 @@ Python 3.13 is a newer version and might have compatibility issues with some lib
 1. Try using an earlier Python version (3.8-3.12) if available
 2. Make sure you have the latest version of pygame installed
 3. Run with DEBUG=True to see more detailed error messages
-4. Check if there are any specific error messages related to Python 3.13 
+4. Check if there are any specific error messages related to Python 3.13
