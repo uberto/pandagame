@@ -69,10 +69,15 @@ class Game:
                         self.player.jump()
                     elif event.key == pygame.K_p:
                         self.state = GameState.PAUSED
-                    elif event.key == pygame.K_UP and self.player.climbing:
+                    elif event.key == pygame.K_UP:
                         self.player.climb(-1)  # Climb up
-                    elif event.key == pygame.K_DOWN and self.player.climbing:
+                    elif event.key == pygame.K_DOWN:
                         self.player.climb(1)   # Climb down
+                
+                # Handle key releases for climbing
+                elif event.type == pygame.KEYUP:
+                    if event.key == pygame.K_UP or event.key == pygame.K_DOWN:
+                        self.player.stop_climbing()
                         
             elif self.state == GameState.PAUSED:
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
@@ -160,6 +165,11 @@ class Game:
             # Draw level info
             level_text = self.font.render(f"Level: {self.current_level}", True, self.BLACK)
             self.screen.blit(level_text, (20, 20))
+            
+            # Draw climbing status if in debug mode
+            if self.DEBUG:
+                climbing_text = self.font.render(f"Climbing: {self.player.climbing}", True, self.BLACK)
+                self.screen.blit(climbing_text, (20, 60))
             
         elif self.state == GameState.PAUSED:
             # Draw paused screen

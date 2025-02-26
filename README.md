@@ -62,11 +62,17 @@ We've included a shell script that automatically unsets problematic environment 
 If you encounter any issues with Python environment variables (like PYTHONHOME or PYTHONPATH), the script will help ensure a clean environment for running the game.
 
 ## Controls
-- Arrow Left/Right: Move the panda
-- Space: Jump
-- Up/Down: Climb bamboo (when touching bamboo)
-- P: Pause/Unpause
+- Arrow Left/Right: Move the panda left and right
+- Space: Jump when on the ground
+- Up/Down: Climb bamboo (press once to start climbing, release to stop)
+- P: Pause/Unpause the game
 - Enter: Select menu options
+
+### Climbing Tips
+- When touching bamboo, press Up or Down to start climbing
+- The panda will continue climbing in that direction until you release the key
+- You can still move left and right while climbing
+- Platforms won't block your movement while climbing bamboo
 
 ## Troubleshooting
 If you encounter issues with Python paths or environment variables, try:

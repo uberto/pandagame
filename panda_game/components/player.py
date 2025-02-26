@@ -15,16 +15,39 @@ class Player(pygame.sprite.Sprite):
         self.velocity_y = 0
         self.on_ground = False
         self.climbing = False
+        self.climb_direction = 0  # 0 = not climbing, -1 = up, 1 = down
         self.speed = 5
+        self.climb_speed = 3  # Separate speed for climbing
         self.jump_power = 15
         self.gravity = 0.8
         
     def update(self, platforms=None, bamboo=None):
+        # Store previous position for collision resolution
+        prev_x = self.rect.x
+        prev_y = self.rect.y
+        
+        # Check for bamboo climbing before applying gravity
+        self.climbing = False
+        if bamboo:
+            for stalk in bamboo:
+                # Check if panda is touching bamboo
+                if self.rect.colliderect(stalk.rect):
+                    self.climbing = True
+                    break
+        
         # Apply gravity if not climbing
         if not self.climbing:
             self.velocity_y += self.gravity
+            self.climb_direction = 0  # Reset climb direction when not climbing
+        else:
+            # Apply continuous climbing if a direction is set
+            if self.climb_direction != 0:
+                self.velocity_y = self.climb_direction * self.climb_speed
+            else:
+                # When on bamboo but not actively climbing, slow down vertical movement
+                self.velocity_y *= 0.5
         
-        # Update position
+        # Update horizontal position
         self.rect.x += self.velocity_x
         
         # Check for platform collisions after horizontal movement
@@ -44,23 +67,17 @@ class Player(pygame.sprite.Sprite):
             self.on_ground = False
             for platform in platforms:
                 if self.rect.colliderect(platform.rect):
-                    if self.velocity_y > 0:  # Falling
-                        self.rect.bottom = platform.rect.top
-                        self.velocity_y = 0
-                        self.on_ground = True
-                    elif self.velocity_y < 0:  # Jumping
-                        self.rect.top = platform.rect.bottom
-                        self.velocity_y = 0
-        
-        # Check for bamboo climbing
-        if bamboo:
-            self.climbing = False
-            for stalk in bamboo:
-                if self.rect.colliderect(stalk.rect):
-                    self.climbing = True
-                    # Allow vertical movement on bamboo
-                    if self.velocity_y != 0:
-                        self.velocity_y = self.velocity_y / 2  # Slower climbing
+                    # Only handle platform collisions if not climbing or if the collision is from above
+                    if not self.climbing or self.velocity_y > 0:
+                        if self.velocity_y > 0:  # Falling
+                            self.rect.bottom = platform.rect.top
+                            self.velocity_y = 0
+                            self.on_ground = True
+                        elif self.velocity_y < 0:  # Jumping
+                            # Only block upward movement if the panda's head is close to the platform
+                            if prev_y > platform.rect.bottom - 10:
+                                self.rect.top = platform.rect.bottom
+                                self.velocity_y = 0
             
     def jump(self):
         if self.on_ground:
@@ -72,4 +89,11 @@ class Player(pygame.sprite.Sprite):
         
     def climb(self, direction):
         if self.climbing:
-            self.velocity_y = direction * (self.speed / 2)  # Slower climbing speed 
+            self.climb_direction = direction  # Set climbing direction
+            self.velocity_y = direction * self.climb_speed
+    
+    def stop_climbing(self):
+        """Stop vertical movement when climbing keys are released"""
+        if self.climbing:
+            self.climb_direction = 0
+            self.velocity_y = 0 
